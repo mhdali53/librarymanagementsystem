@@ -75,21 +75,21 @@ class LibraryServiceTest {
     @Test
     public void testFindBookByTitle() {
         Book book = new Book(null, "The Great Gatsby", "F. Scott Fitzgerald", "9780743273565", "Fiction", 1925, "Literature", true);
-        when(bookRepository.findByTitle(book.getTitle())).thenReturn(Arrays.asList(book));
+        when(bookRepository.findByTitleIgnoreCase(book.getTitle())).thenReturn(Arrays.asList(book));
         List<Book> books = libraryService.findBookByTitle("The Great Gatsby");
         assertEquals(1, books.size());
         assertEquals(book.getTitle(), books.get(0).getTitle());
-        verify(bookRepository, times(1)).findByTitle("The Great Gatsby");
+        verify(bookRepository, times(1)).findByTitleIgnoreCase("The Great Gatsby");
     }
     
     @Test
     public void testFindBookByAuthor() {
         Book book = new Book(null, "The Great Gatsby", "F. Scott Fitzgerald", "9780743273565", "Fiction", 1925, "Literature", true);
-        when(bookRepository.findByAuthor(book.getAuthor())).thenReturn(Arrays.asList(book));
+        when(bookRepository.findByAuthorIgnoreCase(book.getAuthor())).thenReturn(Arrays.asList(book));
         List<Book> books = libraryService.findBookByAuthor("F. Scott Fitzgerald");
         assertEquals(1, books.size());
         assertEquals(book.getAuthor(), books.get(0).getAuthor());
-        verify(bookRepository, times(1)).findByAuthor("F. Scott Fitzgerald");
+        verify(bookRepository, times(1)).findByAuthorIgnoreCase("F. Scott Fitzgerald");
     }
     
     @Test

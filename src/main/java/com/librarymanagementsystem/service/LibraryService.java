@@ -39,11 +39,11 @@ public class LibraryService {
     }
     
     public List<Book> findBookByTitle(String title) {
-        return bookRepository.findByTitle(title);
+        return bookRepository.findByTitleIgnoreCase(title);
     }
 
     public List<Book> findBookByAuthor(String author) {
-        return bookRepository.findByAuthor(author);
+        return bookRepository.findByAuthorIgnoreCase(author);
     }
 
     public List<Book> listAllBooks() {
