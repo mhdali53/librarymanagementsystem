@@ -2,6 +2,7 @@ package com.librarymanagementsystem.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,30 +17,38 @@ import java.util.List;
 	    @Autowired
 	    private LibraryService libraryService;
 
-	    @PostMapping
+	    @PostMapping("/books")
 	    public ResponseEntity<Book> createBook(@RequestBody Book book) {
-	    
-	        return ResponseEntity.ok().body(this.libraryService.addBook(book));
+	    	System.out.println("Received book: " + book);
+	       Book savedBook = libraryService.addBook(book);
+	       System.out.println("Saved book: " + savedBook);
+	        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
 	    }
 
 	    @DeleteMapping("/books/{id}")
-	    public void removeBook(@PathVariable Long id) {
+	    public ResponseEntity<String> removeBook(@PathVariable Long id) {
 	        libraryService.removeBook(id);
+	        return new ResponseEntity<String>("Book deleted successfully!.", HttpStatus.OK);
 	    }
 
 	    @GetMapping("/books/title/{title}")
-	    public List<Book> findBookByTitle(@PathVariable String title) {
-	        return libraryService.findBookByTitle(title);
+	    public ResponseEntity<List<Book>> findBookByTitle(@PathVariable String title) {
+	       List<Book> booksWithTitle =  libraryService.findBookByTitle(title);
+	        return new ResponseEntity<>(booksWithTitle, HttpStatus.OK);
+	        
+	        
 	    }
 
 	    @GetMapping("/books/author/{author}")
-	    public List<Book> findBookByAuthor(@PathVariable String author) {
-	        return libraryService.findBookByAuthor(author);
+	    public ResponseEntity<List<Book>> findBookByAuthor(@PathVariable String author) {
+	    	List<Book> booksByAuthor =  libraryService.findBookByAuthor(author);
+	        return new ResponseEntity<>(booksByAuthor, HttpStatus.OK);
 	    }
 
 	    @GetMapping("/books")
-	    public List<Book> listAllBooks() {
-	        return libraryService.listAllBooks();
+	    public ResponseEntity<List<Book>> listAllBooks() {
+	    	List<Book> books = libraryService.listAllBooks();
+	        return new ResponseEntity<>(books, HttpStatus.OK);
 	    }
 
 	    @GetMapping("/books/available")
