@@ -1,6 +1,9 @@
 package com.librarymanagementsystem.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import com.librarymanagementsystem.dto.Book;
 import com.librarymanagementsystem.repository.BookRepository;
@@ -42,9 +46,30 @@ class LibraryServiceTest {
     
     @Test
     public void testRemoveBook() {
-    	Mockito.doNothing().when(bookRepository).deleteById(1L);
-        libraryService.removeBook(1L);
-        verify(bookRepository, times(1)).deleteById(1L);
+        String isbn = "1234567890";
+        Book book = new Book();
+        book.setIsbn(isbn);
+        when(bookRepository.findByIsbn(isbn)).thenReturn(Optional.of(book));
+        doNothing().when(bookRepository).deleteByIsbn(isbn);
+
+        boolean result = libraryService.removeBook(isbn);
+
+        assertTrue(result, "Expected book removal to return true");
+        verify(bookRepository, times(1)).findByIsbn(isbn);
+        verify(bookRepository, times(1)).deleteByIsbn(isbn);
+    }
+    
+    @Test
+    public void testRemoveBookNotFound() {
+        String isbn = "1234567890";
+        when(bookRepository.findByIsbn(isbn)).thenReturn(Optional.empty());
+
+        boolean result = libraryService.removeBook(isbn);
+
+        assertFalse(result, "Expected book removal to return false");
+
+        verify(bookRepository, times(1)).findByIsbn(isbn);
+        verify(bookRepository, never()).deleteByIsbn(anyString());
     }
 
     @Test

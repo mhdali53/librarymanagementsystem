@@ -10,6 +10,7 @@ import com.librarymanagementsystem.dto.Book;
 import com.librarymanagementsystem.service.LibraryService;
 
 import java.util.List;
+import java.util.Optional;
 	
 	@RestController
 	@RequestMapping("/api/library")
@@ -18,18 +19,38 @@ import java.util.List;
 	    private LibraryService libraryService;
 
 	    @PostMapping("/books")
-	    public ResponseEntity<Book> createBook(@RequestBody Book book) {
-	    	System.out.println("Received book: " + book);
-	       Book savedBook = libraryService.addBook(book);
-	       System.out.println("Saved book: " + savedBook);
+	    public ResponseEntity<?> createBook(@RequestBody Book book) {
+	    	Optional<Book> existingBook = libraryService.findBookByISBN(book.getIsbn());
+	        if (existingBook.isPresent()) {
+	           // throw new RuntimeException("Book with ISBN " + book.getIsbn() + " already exists.");
+	        	return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Book with ISBN " + book.getIsbn() + " already exists.");
+	        }
+	        Book savedBook =  libraryService.addBook(book);
 	        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
 	    }
 
-	    @DeleteMapping("/books/{id}")
-	    public ResponseEntity<String> removeBook(@PathVariable Long id) {
-	        libraryService.removeBook(id);
-	        return new ResponseEntity<String>("Book deleted successfully!.", HttpStatus.OK);
+	    @DeleteMapping("/books/{isbn}")
+	    public ResponseEntity<String> removeBook(@PathVariable String isbn) {
+	        
+	    	try {
+	            Optional<Book> optionalBook = libraryService.findBookByISBN(isbn);
+
+	            if (optionalBook.isPresent()) {
+	                libraryService.removeBook(isbn);
+	                return ResponseEntity.ok("Book with ISBN " + isbn + " deleted successfully.");
+	            } else {
+	                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                                     .body("No book found with ISBN " + isbn);
+	            }
+	        } catch (Exception e) {
+	            
+	            e.printStackTrace();
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                                 .body("Internal server error: " + e.getMessage());
+	        }
 	    }
+	    
 
 	    @GetMapping("/books/title/{title}")
 	    public ResponseEntity<List<Book>> findBookByTitle(@PathVariable String title) {

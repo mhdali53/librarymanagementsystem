@@ -1,14 +1,17 @@
 package com.librarymanagementsystem.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.librarymanagementsystem.dto.Book;
 import com.librarymanagementsystem.repository.BookRepository;
+
 
 @Service
 public class LibraryService {
@@ -25,8 +28,14 @@ public class LibraryService {
         return bookRepository.save(book);
     }
 
-    public void removeBook(Long id) {
-        bookRepository.deleteById(id);
+	@Transactional
+	public boolean removeBook(String isbn) {
+        Optional<Book> optionalBook = bookRepository.findByIsbn(isbn);
+        if (optionalBook.isPresent()) {
+            bookRepository.deleteByIsbn(isbn);
+            return true;
+        }
+        return false;
     }
     
     public List<Book> findBookByTitle(String title) {
@@ -43,5 +52,10 @@ public class LibraryService {
 
     public List<Book> listAvailableBooks() {
         return bookRepository.findByIsAvailable(true);
+    }
+    
+    @Transactional(readOnly = true)
+    public Optional<Book> findBookByISBN(String isbn) {
+        return bookRepository.findByIsbn(isbn);
     }
 }
